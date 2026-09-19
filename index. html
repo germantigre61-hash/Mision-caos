@@ -2,26 +2,142 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Misión Caos</title>
 <style>
 body{
   margin:0;
-  font-family:Arial,sans-serif;
-  background:#10121a;
+  background:#090b12;
   color:white;
+  font-family:Arial,sans-serif;
   text-align:center;
 }
-main{padding:35px 20px}
-h1{font-size:42px;margin-bottom:5px}
+.box{
+  max-width:600px;
+  margin:auto;
+  padding:30px 20px;
+}
+h1{
+  font-size:42px;
+  margin-bottom:5px;
+}
 .logo{font-size:65px}
+.sub{color:#aaa;margin-bottom:30px}
 .card{
-  max-width:420px;
-  margin:25px auto;
-  padding:25px;
-  background:#1d2130;
+  background:#171b27;
   border-radius:20px;
+  padding:25px;
+  margin:20px 0;
+}
+#mission{
+  font-size:25px;
+  font-weight:bold;
+  min-height:100px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 button{
   width:100%;
-  padding:17
+  padding:18px;
+  margin:8px 0;
+  border:0;
+  border-radius:15px;
+  font-size:18px;
+  font-weight:bold;
+  background:#7c4dff;
+  color:white;
+}
+button:active{transform:scale(.97)}
+.orange{background:#ff6d00}
+#timer{
+  font-size:45px;
+  font-weight:bold;
+  margin:15px;
+}
+</style>
+</head>
+
+<body>
+<div class="box">
+
+<div class="logo">💥</div>
+<h1>MISIÓN CAOS</h1>
+<div class="sub">Modo simulación</div>
+
+<div class="card">
+<div id="mission">
+Tocá NUEVA MISIÓN para comenzar
+</div>
+<div id="timer"></div>
+</div>
+
+<button onclick="nuevaMision()">🎯 NUEVA MISIÓN</button>
+<button class="orange" onclick="misionFisica()">📱 MISIÓN FÍSICA</button>
+
+</div>
+
+<script>
+const misiones=[
+"🤫 Nadie puede hablar durante 15 segundos.",
+"👉 Elegí a alguien. Esa persona debe tocar la mesa 5 veces.",
+"😂 Todos deben reírse durante 10 segundos. El último pierde.",
+"🕺 Todos tienen 10 segundos para inventar un baile.",
+"👀 Mirá fijamente a otro jugador. El primero que se ríe pierde.",
+"⚡ Tocá la pantalla 10 veces lo más rápido posible.",
+"🙌 Todos deben levantar las manos. El último recibe una penalización.",
+"🎭 Imitá a otro jugador durante 15 segundos.",
+"🔄 Cambiá de lugar con otro jugador antes de que termine el tiempo.",
+"💣 CAOS: todos deben cumplir la misión al mismo tiempo."
+];
+
+const fisicas=[
+"📳 AGITÁ EL CELULAR durante 5 segundos.",
+"🔄 GIRÁ EL CELULAR completamente.",
+"↔️ INCLINÁ el celular hacia la izquierda y después hacia la derecha.",
+"👆 Tocá rápidamente la pantalla 15 veces.",
+"🧊 Mantené el celular TOTALMENTE QUIETO durante 8 segundos.",
+"📸 MISIÓN FOTO: preparate para sacar una foto grupal.",
+"⬆️ Levantá el celular por encima de tu cabeza durante 5 segundos."
+];
+
+function elegir(lista){
+ return lista[Math.floor(Math.random()*lista.length)];
+}
+
+function nuevaMision(){
+ document.getElementById("mission").innerText=elegir(misiones);
+ vibrar();
+ cuenta(15);
+}
+
+function misionFisica(){
+ document.getElementById("mission").innerText=elegir(fisicas);
+ vibrar();
+ cuenta(10);
+}
+
+function vibrar(){
+ if(navigator.vibrate) navigator.vibrate([150,80,150]);
+}
+
+function cuenta(seg){
+ clearInterval(window.reloj);
+ let n=seg;
+ const t=document.getElementById("timer");
+ t.innerText=n;
+
+ window.reloj=setInterval(()=>{
+   n--;
+   t.innerText=n;
+
+   if(n<=0){
+     clearInterval(window.reloj);
+     t.innerText="💥 ¡TIEMPO!";
+     vibrar();
+   }
+ },1000);
+}
+</script>
+</body>
+</html>
