@@ -2,142 +2,70 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Misión Caos</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Misión Caos 2.0</title>
 <style>
-body{
-  margin:0
-  background:#090b12;
-  color:white;
-  font-family:Arial,sans-serif;
-  text-align:center;
-}
-.box{
-  max-width:600px;
-  margin:auto;
-  padding:30px 20px;
-}
-h1{
-  font-size:42px;
-  margin-bottom:5px;
-}
-.logo{font-size:65px}
-.sub{color:#aaa;margin-bottom:30px}
-.card{
-  background:#171b27;
-  border-radius:20px;
-  padding:25px;
-  margin:20px 0;
-}
-#mission{
-  font-size:25px;
-  font-weight:bold;
-  min-height:100px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-button{
-  width:100%;
-  padding:18px;
-  margin:8px 0;
-  border:0;
-  border-radius:15px;
-  font-size:18px;
-  font-weight:bold;
-  background:#7c4dff;
-  color:white;
-}
-button:active{transform:scale(.97)}
-.orange{background:#ff6d00}
-#timer{
-  font-size:45px;
-  font-weight:bold;
-  margin:15px;
-}
+*{box-sizing:border-box}body{margin:0;background:#080a10;color:#fff;font-family:Arial,sans-serif;text-align:center;min-height:100vh}
+.wrap{max-width:620px;margin:auto;padding:22px 18px 40px}.logo{font-size:58px}h1{font-size:38px;margin:4px 0}.sub{color:#aab0c0;margin-bottom:16px}
+.card{background:#151a27;border:1px solid #30384d;border-radius:22px;padding:22px;margin:14px 0;box-shadow:0 10px 30px #0008}
+.badge{display:inline-block;background:#262d40;border-radius:99px;padding:8px 13px;font-size:13px}
+.chaos{height:12px;background:#242a38;border-radius:10px;overflow:hidden;margin:14px 0}.chaos>div{height:100%;width:18%;background:linear-gradient(90deg,#7c4dff,#ff3d71)}
+#mission{font-size:24px;font-weight:800;min-height:96px;display:flex;align-items:center;justify-content:center;line-height:1.25}
+#status{font-size:17px;min-height:54px;color:#c9d0e4}.meter{font-size:13px;color:#8e98b2;margin:8px 0}#timer{font-size:50px;font-weight:900;margin:8px}
+button{width:100%;padding:17px;margin:7px 0;border:0;border-radius:15px;font-size:17px;font-weight:800;background:#7c4dff;color:#fff}.alt{background:#ff6d00}.dark{background:#293044}
+.flash{animation:flash .25s 2}@keyframes flash{50%{background:#55125f}}.ok{color:#63e6a5!important}.bad{color:#ff6685!important}
 </style>
 </head>
-
 <body>
-<div class="box">
-
-<div class="logo">💥</div>
-<h1>MISIÓN CAOS</h1>
-<div class="sub">Modo simulación</div>
-
-<div class="card">
-<div id="mission">
-Tocá NUEVA MISIÓN para comenzar
-</div>
-<div id="timer"></div>
-</div>
-
-<button onclick="nuevaMision()">🎯 NUEVA MISIÓN</button>
-<button class="orange" onclick="misionFisica()">📱 MISIÓN FÍSICA</button>
-
-</div>
-
+<div class="wrap">
+<div class="logo">💥</div><h1>MISIÓN CAOS 2.0</h1><div class="sub">Tu celular juega y comprueba</div>
+<div class="card"><span class="badge">🧪 PRUEBA DE SENSORES</span><div class="chaos"><div id="chaosbar"></div></div>
+<div id="mission">Activá los sensores para empezar.</div><div id="timer"></div>
+<div id="status">El juego verificará automáticamente si cumplís.</div><div class="meter" id="meter"></div></div>
+<button onclick="activar()">📱 ACTIVAR SENSORES</button>
+<button class="alt" onclick="nueva()">⚡ NUEVO DESAFÍO REAL</button>
+<button class="dark" onclick="foto()">📸 PRUEBA DE CÁMARA</button>
+<input id="camera" type="file" accept="image/*" capture="environment" hidden>
 <script>
-const misiones=[
-"🤫 Nadie puede hablar durante 15 segundos.",
-"👉 Elegí a alguien. Esa persona debe tocar la mesa 5 veces.",
-"😂 Todos deben reírse durante 10 segundos. El último pierde.",
-"🕺 Todos tienen 10 segundos para inventar un baile.",
-"👀 Mirá fijamente a otro jugador. El primero que se ríe pierde.",
-"⚡ Tocá la pantalla 10 veces lo más rápido posible.",
-"🙌 Todos deben levantar las manos. El último recibe una penalización.",
-"🎭 Imitá a otro jugador durante 15 segundos.",
-"🔄 Cambiá de lugar con otro jugador antes de que termine el tiempo.",
-"💣 CAOS: todos deben cumplir la misión al mismo tiempo."
+let active=false,mission=null,hits=0,taps=0,stillBad=false,timer=null,chaos=18,left=false,right=false;
+const missions=[
+{id:'shake',text:'📳 AGITÁ el celular con fuerza 6 veces.',sec:12},
+{id:'tilt',text:'↔️ INCLINÁ el celular a la izquierda y después a la derecha.',sec:12},
+{id:'flip',text:'🔄 GIRÁ el celular hasta ponerlo casi boca abajo.',sec:12},
+{id:'still',text:'🧊 DEJÁ el celular totalmente quieto durante 5 segundos.',sec:7},
+{id:'tap',text:'👆 TOCÁ el centro de la pantalla 15 veces.',sec:8}
 ];
-
-const fisicas=[
-"📳 AGITÁ EL CELULAR durante 5 segundos.",
-"🔄 GIRÁ EL CELULAR completamente.",
-"↔️ INCLINÁ el celular hacia la izquierda y después hacia la derecha.",
-"👆 Tocá rápidamente la pantalla 15 veces.",
-"🧊 Mantené el celular TOTALMENTE QUIETO durante 8 segundos.",
-"📸 MISIÓN FOTO: preparate para sacar una foto grupal.",
-"⬆️ Levantá el celular por encima de tu cabeza durante 5 segundos."
-];
-
-function elegir(lista){
- return lista[Math.floor(Math.random()*lista.length)];
+const el=id=>document.getElementById(id);
+function vib(p=[120,60,120]){if(navigator.vibrate)navigator.vibrate(p)}
+async function activar(){
+ try{
+  if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function')await DeviceMotionEvent.requestPermission();
+  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function')await DeviceOrientationEvent.requestPermission();
+  active=true;el('status').innerHTML='<span class="ok">✓ Sensores activados. Elegí NUEVO DESAFÍO REAL.</span>';vib();
+ }catch(e){el('status').innerHTML='<span class="bad">No se concedió permiso a los sensores.</span>'}
 }
-
-function nuevaMision(){
- document.getElementById("mission").innerText=elegir(misiones);
- vibrar();
- cuenta(15);
+function nueva(){
+ if(!active){activar();return}
+ mission=missions[Math.floor(Math.random()*missions.length)];hits=0;taps=0;stillBad=false;left=false;right=false;
+ el('mission').textContent=mission.text;el('status').textContent='Comprobando…';el('meter').textContent='';vib([80,50,80,50,160]);
+ document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),600);countdown(mission.sec);
+ if(mission.id==='still')setTimeout(()=>{if(mission&&mission.id==='still'&&!stillBad)win('✓ Quieto durante 5 segundos: MISIÓN CUMPLIDA')},5000);
 }
-
-function misionFisica(){
- document.getElementById("mission").innerText=elegir(fisicas);
- vibrar();
- cuenta(10);
-}
-
-function vibrar(){
- if(navigator.vibrate) navigator.vibrate([150,80,150]);
-}
-
-function cuenta(seg){
- clearInterval(window.reloj);
- let n=seg;
- const t=document.getElementById("timer");
- t.innerText=n;
-
- window.reloj=setInterval(()=>{
-   n--;
-   t.innerText=n;
-
-   if(n<=0){
-     clearInterval(window.reloj);
-     t.innerText="💥 ¡TIEMPO!";
-     vibrar();
-   }
- },1000);
-}
-</script>
-</body>
-</html>
+function countdown(s){clearInterval(timer);let n=s;el('timer').textContent=n;timer=setInterval(()=>{n--;el('timer').textContent=n;if(n<=0){clearInterval(timer);if(mission)fail()}},1000)}
+function win(msg){if(!mission)return;clearInterval(timer);mission=null;chaos=Math.min(100,chaos+12);el('chaosbar').style.width=chaos+'%';el('timer').textContent='✓';el('status').innerHTML='<span class="ok">'+msg+'</span>';vib([100,60,100,60,250])}
+function fail(){mission=null;el('timer').textContent='💣';el('status').innerHTML='<span class="bad">No detecté la acción a tiempo.</span>';vib([350,100,350])}
+window.addEventListener('devicemotion',e=>{
+ if(!mission)return;let a=e.accelerationIncludingGravity||{},x=a.x||0,y=a.y||0,z=a.z||0,mag=Math.sqrt(x*x+y*y+z*z);
+ el('meter').textContent='Movimiento: '+mag.toFixed(1);
+ if(mission.id==='shake'&&mag>18){hits++;el('status').textContent='Agitaciones detectadas: '+hits+'/6';if(hits>=6)win('✓ Agitación comprobada')}
+ if(mission.id==='still'&&mag>12.5)stillBad=true;
+});
+window.addEventListener('deviceorientation',e=>{
+ if(!mission)return;let g=e.gamma||0,b=e.beta||0;el('meter').textContent='Inclinación: '+Math.round(g)+'° · giro: '+Math.round(b)+'°';
+ if(mission.id==='tilt'){if(g<-28)left=true;if(left&&g>28)right=true;if(left&&right)win('✓ Inclinación comprobada')}
+ if(mission.id==='flip'&&Math.abs(b)>145)win('✓ Giro comprobado');
+});
+document.addEventListener('pointerdown',e=>{if(mission&&mission.id==='tap'&&!e.target.closest('button')){taps++;el('status').textContent='Toques: '+taps+'/15';if(taps>=15)win('✓ 15 toques comprobados')}})
+function foto(){el('camera').click()}
+el('camera').addEventListener('change',()=>{if(el('camera').files.length){el('mission').textContent='📸 FOTO CAPTURADA';el('status').innerHTML='<span class="ok">✓ El celular comprobó que se tomó una foto.</span>';vib()}})
+</script></div></body></html>
